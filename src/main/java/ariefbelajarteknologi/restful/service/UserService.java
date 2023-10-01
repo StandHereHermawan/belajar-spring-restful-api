@@ -1,19 +1,14 @@
 package ariefbelajarteknologi.restful.service;
 
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.ConstraintViolationException;
-import jakarta.validation.Validator;
+import ariefbelajarteknologi.restful.entity.User;
+import ariefbelajarteknologi.restful.model.RegisterUserRequest;
+import ariefbelajarteknologi.restful.repository.UserRepository;
+import ariefbelajarteknologi.restful.security.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-import ariefbelajarteknologi.restful.entity.User;
-import ariefbelajarteknologi.restful.model.RegisterUserRequest;
-import ariefbelajarteknologi.restful.repository.UserRepository;
-import ariefbelajarteknologi.restful.security.BCrypt;
-
-import java.util.Set;
 
 @Service
 public class UserService {
@@ -22,14 +17,11 @@ public class UserService {
     private UserRepository userRepository;
 
     @Autowired
-    private Validator validator;
+    private ValidationService validationService;
 
     @Transactional
     public void register(RegisterUserRequest request) {
-        Set<ConstraintViolation<RegisterUserRequest>> constraintViolations = validator.validate(request);
-        if (constraintViolations.size() != 0) {
-            throw new ConstraintViolationException(constraintViolations);
-        }
+        validationService.validate(request);
 
         if (userRepository.existsById(request.getUsername())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username already registered");
