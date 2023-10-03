@@ -1,14 +1,12 @@
 package ariefbelajarteknologi.restful.controller;
 
-import ariefbelajarteknologi.restful.entity.User;
-import ariefbelajarteknologi.restful.model.UserResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import ariefbelajarteknologi.restful.entity.User;
 import ariefbelajarteknologi.restful.model.RegisterUserRequest;
+import ariefbelajarteknologi.restful.model.UpdateUserRequest;
+import ariefbelajarteknologi.restful.model.UserResponse;
 import ariefbelajarteknologi.restful.model.WebResponse;
 import ariefbelajarteknologi.restful.service.UserService;
 
@@ -32,8 +30,18 @@ public class UserController {
             path = "/api/users/current",
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public WebResponse<UserResponse> get(User user){
+    public WebResponse<UserResponse> get(User user) {
         UserResponse userResponse = userService.get(user);
+        return WebResponse.<UserResponse>builder().data(userResponse).build();
+    }
+
+    @PatchMapping(
+            path = "/api/users/current",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public WebResponse<UserResponse> update(User user, @RequestBody UpdateUserRequest request) {
+        UserResponse userResponse = userService.update(user, request);
         return WebResponse.<UserResponse>builder().data(userResponse).build();
     }
 }
