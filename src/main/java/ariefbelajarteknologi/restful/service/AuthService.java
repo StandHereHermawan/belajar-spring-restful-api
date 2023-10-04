@@ -46,4 +46,12 @@ public class AuthService {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Username or Password Wrong");
         }
     }
+
+    @Transactional
+    public void logout(User user){
+        user.setToken(null);
+        user.setTokenExpiredAt(null);
+
+        userRepository.save(user);
+    }
 }
