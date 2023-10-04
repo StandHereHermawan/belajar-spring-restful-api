@@ -17,6 +17,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -107,7 +108,8 @@ class AuthControllerTest {
                         .content(objectMapper.writeValueAsString(request))
         ).andExpectAll(
                 status().isOk()
-        ).andDo(result -> {
+        ).andDo(result ->
+        {
             WebResponse<TokenResponse> response = objectMapper.readValue(
                     result.getResponse().getContentAsString(),
                     new TypeReference<>() {
@@ -118,8 +120,41 @@ class AuthControllerTest {
 
             User userDataDb = userRepository.findById("test").orElse(null);
             assertNotNull(userDataDb);
-            assertEquals(userDataDb.getToken(),response.getData().getToken());
-            assertEquals(userDataDb.getTokenExpiredAt(),response.getData().getExpiredAt());
+            assertEquals(userDataDb.getToken(), response.getData().getToken());
+            assertEquals(userDataDb.getTokenExpiredAt(), response.getData().getExpiredAt());
+        });
+    }
+
+    @Test
+    void testLogOutFailed() throws Exception {
+        User user = new User();
+        user.setUsername("test");
+        user.setPassword(BCrypt.hashpw("rahasia", BCrypt.gensalt()));
+        user.setName("Test");
+        user.setToken("test");
+        user.setTokenExpiredAt(System.currentTimeMillis() + (1000L * 60L * 60L * 24L * 30L));
+        userRepository.save(user);
+
+        mockMvc.perform(
+                delete("/api/auth/logout")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .header("X-API-TOKEN","test")
+        ).andExpectAll(
+                status().isOk()
+        ).andDo(result ->
+        {
+            WebResponse<String> response = objectMapper.readValue(
+                    result.getResponse().getContentAsString(),
+                    new TypeReference<>() {
+                    });
+
+            assertNull(response.getErrors());
+            assertEquals("OK",response.getData());
+
+            User userDb = userRepository.findById("test").orElse(null);
+            assertNotNull(userDb);
+            assertNull(userDb.getTokenExpiredAt());
+            assertNull(userDb.getToken());
         });
     }
 }

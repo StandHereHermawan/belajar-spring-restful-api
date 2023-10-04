@@ -218,7 +218,7 @@ class UserControllerTest {
         user.setPassword(BCrypt.hashpw("rahasia", BCrypt.gensalt()));
         user.setName("Test");
         user.setToken("test");
-        user.setTokenExpiredAt(System.currentTimeMillis() + 100000000000L);
+        user.setTokenExpiredAt(System.currentTimeMillis() + (1000L * 60L * 60L * 24L * 30L));
         userRepository.save(user);
 
         UpdateUserRequest request = new UpdateUserRequest();
