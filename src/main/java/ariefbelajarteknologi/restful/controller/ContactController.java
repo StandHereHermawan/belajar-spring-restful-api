@@ -3,6 +3,7 @@ package ariefbelajarteknologi.restful.controller;
 import ariefbelajarteknologi.restful.entity.User;
 import ariefbelajarteknologi.restful.model.ContactResponse;
 import ariefbelajarteknologi.restful.model.CreateContactRequest;
+import ariefbelajarteknologi.restful.model.UpdateContactRequest;
 import ariefbelajarteknologi.restful.model.WebResponse;
 import ariefbelajarteknologi.restful.service.ContactService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +32,22 @@ public class ContactController {
     )
     public WebResponse<ContactResponse> get(User user, @PathVariable("contactId") String contactId){
         ContactResponse contactResponse = contactService.get(user, contactId);
+        return WebResponse.<ContactResponse>builder().data(contactResponse).build();
+    }
+
+    @PutMapping(
+            path = "/api/contacts/{contactId}",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public WebResponse<ContactResponse> update(
+            User user,
+            @RequestBody UpdateContactRequest request,
+            @PathVariable("contactId") String contactId
+    )
+    {
+        request.setId(contactId);
+        ContactResponse contactResponse = contactService.update(user, request);
         return WebResponse.<ContactResponse>builder().data(contactResponse).build();
     }
 }
