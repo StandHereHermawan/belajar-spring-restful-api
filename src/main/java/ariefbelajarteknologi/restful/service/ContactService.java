@@ -4,6 +4,7 @@ import ariefbelajarteknologi.restful.entity.Contact;
 import ariefbelajarteknologi.restful.entity.User;
 import ariefbelajarteknologi.restful.model.ContactResponse;
 import ariefbelajarteknologi.restful.model.CreateContactRequest;
+import ariefbelajarteknologi.restful.model.UpdateContactRequest;
 import ariefbelajarteknologi.restful.repository.ContactRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,6 +23,16 @@ public class ContactService {
     @Autowired
     private ValidationService validationService;
 
+    private ContactResponse toContactResponse(Contact contact){
+        return ContactResponse.builder()
+                .id(contact.getId())
+                .firstName(contact.getFirstName())
+                .lastName(contact.getLastName())
+                .email(contact.getEmail())
+                .phone(contact.getPhone())
+                .build();
+    }
+
     @Transactional
     public ContactResponse create(User user, CreateContactRequest request){
         validationService.validate(request);
@@ -39,20 +50,26 @@ public class ContactService {
         return toContactResponse(contact);
     }
 
-    private ContactResponse toContactResponse(Contact contact){
-        return ContactResponse.builder()
-                .id(contact.getId())
-                .firstName(contact.getFirstName())
-                .lastName(contact.getLastName())
-                .email(contact.getEmail())
-                .phone(contact.getPhone())
-                .build();
-    }
-
     @Transactional
     public ContactResponse get(User user,String id){
         Contact contact = contactRepository.findFirstByUserAndId(user, id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Contact Not Found"));
+
+        return toContactResponse(contact);
+    }
+
+    @Transactional
+    public ContactResponse update(User user, UpdateContactRequest request){
+        validationService.validate(request);
+
+        Contact contact = contactRepository.findFirstByUserAndId(user, request.getId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Contact Not Found"));
+
+        contact.setFirstName(request.getFirstName());
+        contact.setLastName(request.getLastName());
+        contact.setEmail(request.getEmail());
+        contact.setPhone(request.getPhone());
+        contactRepository.save(contact);
 
         return toContactResponse(contact);
     }
