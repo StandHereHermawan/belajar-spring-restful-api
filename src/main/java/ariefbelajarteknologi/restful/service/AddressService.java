@@ -59,4 +59,14 @@ public class AddressService {
         return toAddressResponse(address);
     }
 
+    @Transactional(readOnly = true)
+    public AddressResponse get(User user, String contactId, String addressId) {
+        Contact contact = contactRepository.findFirstByUserAndId(user, contactId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Contact is not Found"));
+
+        Address address = addressRepository.findFirstByContactAndId(contact, addressId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Address is not Found"));
+
+        return toAddressResponse(address);
+    }
 }
