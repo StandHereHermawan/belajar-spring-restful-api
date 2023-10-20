@@ -5,6 +5,7 @@ import ariefbelajarteknologi.restful.entity.Contact;
 import ariefbelajarteknologi.restful.entity.User;
 import ariefbelajarteknologi.restful.model.AddressResponse;
 import ariefbelajarteknologi.restful.model.CreateAddressRequest;
+import ariefbelajarteknologi.restful.model.UpdateAddressRequest;
 import ariefbelajarteknologi.restful.repository.AddressRepository;
 import ariefbelajarteknologi.restful.repository.ContactRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,6 +67,26 @@ public class AddressService {
 
         Address address = addressRepository.findFirstByContactAndId(contact, addressId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Address is not Found"));
+
+        return toAddressResponse(address);
+    }
+
+    @Transactional
+    public AddressResponse update(User user, UpdateAddressRequest request){
+        validationService.validate(request);
+
+        Contact contact = contactRepository.findFirstByUserAndId(user, request.getContactId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Contact is not Found"));
+
+        Address address = addressRepository.findFirstByContactAndId(contact, request.getAddressId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Address is not Found"));
+
+        address.setStreet(request.getStreet());
+        address.setCity(request.getCity());
+        address.setProvince(request.getProvince());
+        address.setCountry(request.getCountry());
+        address.setPostalCode(request.getPostalCode());
+        addressRepository.save(address);
 
         return toAddressResponse(address);
     }
